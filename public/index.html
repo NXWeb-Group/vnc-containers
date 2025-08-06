@@ -1,0 +1,24 @@
+<button onclick="getVNC()">Get VNC</button>
+
+<script>
+  function getVNC() {
+    fetch('/api/createContainer')
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Network response was not ok');
+      })
+      .then(data => {
+        // Handle the VNC data
+        console.log(data);
+        // Wait 2 seconds before redirecting to allow container to start
+        setTimeout(() => {
+          window.location.href = `/vnc_lite.html?path=websockify/${data.id}`;
+        }, 2000);
+      })
+      .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+      });
+  }
+</script>
