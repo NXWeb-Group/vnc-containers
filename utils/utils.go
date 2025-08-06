@@ -5,6 +5,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
+
+	"github.com/docker/docker/client"
 )
 
 func CreateTarArchive(srcDir string) (io.ReadCloser, error) {
@@ -58,4 +62,15 @@ func CreateTarArchive(srcDir string) (io.ReadCloser, error) {
 	}()
 
 	return pr, nil
+}
+
+func StartContainerTimer(cli *client.Client, containerName string, unusedContainer map[string]bool, mutex *sync.Mutex) {
+	time.Sleep(1 * time.Minute)
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	if _, exists := unusedContainer[containerName]; exists {
+		go cleanupContainer(cli, containerName)
+		delete(unusedContainer, containerName)
+	}
 }

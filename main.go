@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/NXWeb-Group/vnc-containers/utils"
 	"github.com/docker/docker/api/types/build"
@@ -59,6 +60,9 @@ func main() {
 
 	app.Static("/", "./public")
 
+	unusedContainer := map[string]bool{}
+	var mutex sync.Mutex
+
 	app.Get("/api/createContainer", func(c *fiber.Ctx) error {
 		id := uuid.NewString()
 		containerName := "chrome-instance-" + id
@@ -79,13 +83,19 @@ func main() {
 			return c.Status(fiber.StatusInternalServerError).SendString("Failed to start container: " + err.Error())
 		}
 
+		mutex.Lock()
+		unusedContainer[containerName] = true
+		mutex.Unlock()
+
+		go utils.StartContainerTimer(cli, containerName, unusedContainer, &mutex)
+
 		return c.JSON(fiber.Map{"id": id})
 	})
 
 	app.Get("/websockify/:id", websocket.New(func(c *websocket.Conn) {
 		id := c.Params("id")
 		log.Println("WebSocket connection established")
-		utils.HandleWebSocket(c, id)
+		utils.HandleWebSocket(c, id, cli, unusedContainer, &mutex)
 	}))
 
 	log.Println("Server starting on", port)

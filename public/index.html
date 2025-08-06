@@ -13,8 +13,9 @@
         // Handle the VNC data
         console.log(data);
         // Wait 2 seconds before redirecting to allow container to start
+        sessionStorage.setItem('containerId', data.id);
         setTimeout(() => {
-          window.location.href = `/vnc_lite.html?path=websockify/${data.id}`;
+          window.location.href = "/vnc_lite.html";
         }, 2000);
       })
       .catch(error => {

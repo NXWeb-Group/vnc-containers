@@ -131,7 +131,9 @@
         const host = readQueryVariable('host', window.location.hostname);
         let port = readQueryVariable('port', window.location.port);
         const password = readQueryVariable('password');
-        const path = readQueryVariable('path', 'websockify');
+        // const path = readQueryVariable('path', 'websockify');
+        const path = `websockify/${sessionStorage.getItem('containerId')}`;
+        sessionStorage.removeItem('containerId');
 
         // | | |         | | |
         // | | | Connect | | |
