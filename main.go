@@ -58,7 +58,7 @@ func main() {
 
 	app := fiber.New()
 
-	app.Static("/", "./public")
+	app.Static("/", "./frontend/dist")
 
 	unusedContainer := map[string]bool{}
 	var mutex sync.Mutex
